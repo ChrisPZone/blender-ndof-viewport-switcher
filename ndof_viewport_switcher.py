@@ -1,3 +1,7 @@
+# GNU General Public License v3.0 (see LICENSE)
+# (C) 2025 ChrisP
+
+
 bl_info = {
     "name": "NDOF Viewport Switcher",
     "author": "ChrisP",
