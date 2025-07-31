@@ -65,12 +65,13 @@ class NDOFViewportSwitchOperator(bpy.types.Operator):
                 area = next((a for a in context.screen.areas if a.type == 'VIEW_3D'), None)
                 if area:
                     region_3d = area.spaces.active.region_3d
+                    perspective = region_3d.view_perspective
 
                     # Exit fixed view
-                    if region_3d.view_perspective in {'ORTHO', 'CAMERA'}:
-                        prev_view = region_3d.view_perspective
+                    if perspective in {'ORTHO', 'CAMERA'}:
                         region_3d.view_perspective = 'PERSP'
-                        region_3d.view_distance = 10
+                        if perspective == 'CAMERA':
+                            region_3d.view_distance = 10
                         # return {'FINISHED'}
 
         return {'PASS_THROUGH'}
@@ -89,8 +90,8 @@ def startOperator():
 def register():
     bpy.utils.register_class(NDOFViewportSwitcherPreferences)
     bpy.utils.register_class(NDOFViewportSwitchOperator)
-    # Start operator via timer after 0.2s to ensure safe context
-    bpy.app.timers.register(startOperator, first_interval=0.2)
+    # Start operator via timer to ensure safe context
+    bpy.app.timers.register(startOperator, first_interval=1)
 
 def unregister():
     bpy.utils.unregister_class(NDOFViewportSwitchOperator)
