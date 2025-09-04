@@ -33,3 +33,12 @@ Ideas that need YOU:
 - Detect older Blender versions with different APIs to access the NDOF motion data and make this add-on work with Blender 4.4 and maybe even down to 3.6 (?)
 - Turn this into an "extensions" for Blender 4+ instead of a legacy add-on
 - Keep it working in the future with newer Blender/API versions
+
+
+## Change Log
+
+- v1.2 @ 2025-09-04
+  - Restart operator when opening a different/new file
+- v1.1 @ 2025-07-31
+  - Don't reset view distance when coming from ORTHO view
+

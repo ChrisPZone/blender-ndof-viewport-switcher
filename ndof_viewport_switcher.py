@@ -5,7 +5,7 @@
 bl_info = {
     "name": "NDOF Viewport Switcher",
     "author": "ChrisP",
-    "version": (1, 0),
+    "version": (1, 2, 0),
     "blender": (4, 5, 0),
     "location": "View3D",
     "description": "Exits fixed views when NDOF device motion exceeds threshold",
@@ -14,6 +14,7 @@ bl_info = {
 
 
 import bpy
+from bpy.app.handlers import persistent
 from math import fabs
 
 
@@ -78,6 +79,7 @@ class NDOFViewportSwitchOperator(bpy.types.Operator):
 
     def invoke(self, context, event):
         context.window_manager.modal_handler_add(self)
+        self.report({'INFO'}, "NDOF Viewport Switcher is ON")
         return {'RUNNING_MODAL'}
 
 
@@ -99,3 +101,18 @@ def unregister():
 
 if __name__ == "__main__":
     register()
+
+
+
+@persistent
+def restartOperator(dummy):
+    # Unregister any existing timer to avoid duplication
+    try:
+        bpy.app.timers.unregister(startOperator)
+    except Exception:
+        pass
+    # Register timer/operator again
+    bpy.app.timers.register(startOperator, first_interval=1)
+
+bpy.app.handlers.load_post.append(restartOperator)
+
