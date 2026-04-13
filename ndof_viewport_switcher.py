@@ -1,11 +1,11 @@
 # GNU General Public License v3.0 (see LICENSE)
-# (C) 2025 ChrisP
+# (C) 2025-2026 ChrisP
 
 
 bl_info = {
     "name": "NDOF Viewport Switcher",
     "author": "ChrisP",
-    "version": (1, 2, 0),
+    "version": (1, 3, 0),
     "blender": (4, 5, 0),
     "location": "View3D",
     "description": "Exits fixed views when NDOF device motion exceeds threshold",
@@ -16,6 +16,15 @@ bl_info = {
 import bpy
 from bpy.app.handlers import persistent
 from math import fabs
+
+
+# Utility to get the screen area under the mouse pointer
+def view3d_area_under_mouse(context, event):
+    x, y = event.mouse_x, event.mouse_y
+    for area in context.window.screen.areas:
+        if area.type == 'VIEW_3D' and area.x <= x < area.x + area.width and area.y <= y < area.y + area.height:
+            return area
+    return None
 
 
 # Threshold Preferences
@@ -63,7 +72,8 @@ class NDOFViewportSwitchOperator(bpy.types.Operator):
 
             # Check threshold
             if fabs(tx) > dt or fabs(ty) > dt or fabs(tz) > dt or fabs(rx) > dr or fabs(ry) > dr or fabs(rz) > dr:
-                area = next((a for a in context.screen.areas if a.type == 'VIEW_3D'), None)
+                # area = next((a for a in context.screen.areas if a.type == 'VIEW_3D'), None)
+                area = view3d_area_under_mouse(context, event)
                 if area:
                     region_3d = area.spaces.active.region_3d
                     perspective = region_3d.view_perspective

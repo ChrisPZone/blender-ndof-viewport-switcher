@@ -37,6 +37,8 @@ Ideas that need YOU:
 
 ## Change Log
 
+- v1.3 @ 2026-04-13
+  - Only affect the 3D view under the mouse pointer
 - v1.2 @ 2025-09-04
   - Restart operator when opening a different/new file
 - v1.1 @ 2025-07-31
