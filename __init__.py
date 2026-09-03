@@ -5,7 +5,7 @@
 bl_info = {
     "name": "NDOF Viewport Switcher",
     "author": "ChrisP",
-    "version": (1, 3, 0),
+    "version": (1, 3, 1),
     "blender": (4, 5, 0),
     "location": "View3D",
     "description": "Exits fixed views when NDOF device motion exceeds threshold",

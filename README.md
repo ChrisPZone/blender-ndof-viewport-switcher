@@ -9,34 +9,34 @@ While you can always use the middle-mouse-btn to rotate out of an ortho (e.g. nu
 
 With this Add-on however, you can force Blender to exit a fixed view into perspective view by pushing/rotating the NDOF device beyond a configurable threshold.
 
-This video explains everything: https://youtu.be/xbDfJ20Jr8E
+This video explains things: https://youtu.be/xbDfJ20Jr8E
+(Note: The video was recorded for version 1, the add-on has improved since)
 
 
-### Installation
+## Installation
 
-- Download the ndof_viewport_switcher.py file
-- In Blender open Preferences > Add-ons
-- Use "Install from Disk" from the little dropdown in the top right corner of the Add-ons panel
-- and install the ndof_viewport_switcher.py file
+- In Blender open "Preferences" > "Get Extenstions"
+- Search for "NDOF Viewport Switcher"
+- Click "Install"
 
-As long as the add-on is enabled, you can move/rotate out of a fixed view using your NDOF device (see video!)
+As long as the add-on is **enabled**, you can move/rotate out of a fixed view using your NDOF device (see video!)
 
 
-### Add-on Preferences
+## Add-on Preferences
 
 You can set the Translation and Rotation thresholds in the Add-On's preferences. Higher values need stronger motion/force on the NDOF device to exit the fixed ortho/camera view.
 
 
-### Contribute
+## Local Build & Install
 
-Ideas that need YOU:
-- Detect older Blender versions with different APIs to access the NDOF motion data and make this add-on work with Blender 4.4 and maybe even down to 3.6 (?)
-- Turn this into an "extensions" for Blender 4+ instead of a legacy add-on
-- Keep it working in the future with newer Blender/API versions
+- Build: ```blender --command extension build```
+- Install: Drag-And-Drop the generated ZIP file into Blender
 
 
 ## Change Log
 
+- v1.3.1 @ 2026-09-03
+  - Add-On is now a Blender Extension
 - v1.3 @ 2026-04-13
   - Only affect the 3D view under the mouse pointer
 - v1.2 @ 2025-09-04
