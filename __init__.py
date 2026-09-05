@@ -5,10 +5,10 @@
 bl_info = {
     "name": "NDOF Viewport Switcher",
     "author": "ChrisP",
-    "version": (1, 3, 1),
+    "version": (1, 3, 2),
     "blender": (4, 5, 0),
     "location": "View3D",
-    "description": "Exits fixed views when NDOF device motion exceeds threshold",
+    "description": "Exit fixed views (ortho/camera) with NDOF device",
     "category": "3D View",
 }
 
@@ -29,7 +29,7 @@ def view3d_area_under_mouse(context, event):
 
 # Threshold Preferences
 class NDOFViewportSwitcherPreferences(bpy.types.AddonPreferences):
-    bl_idname = __name__
+    bl_idname = __package__
 
     translation_threshold: bpy.props.FloatProperty(
         name="Translation Threshold",
@@ -93,6 +93,17 @@ class NDOFViewportSwitchOperator(bpy.types.Operator):
         return {'RUNNING_MODAL'}
 
 
+@persistent
+def restartOperator(dummy):
+    # Unregister any existing timer to avoid duplication
+    try:
+        bpy.app.timers.unregister(startOperator)
+    except Exception:
+        pass
+    # Register timer/operator again
+    bpy.app.timers.register(startOperator, first_interval=1)
+
+
 def startOperator():
     if bpy.context.window_manager:
         bpy.ops.view3d.ndof_viewport_switch('INVOKE_DEFAULT')
@@ -104,6 +115,7 @@ def register():
     bpy.utils.register_class(NDOFViewportSwitchOperator)
     # Start operator via timer to ensure safe context
     bpy.app.timers.register(startOperator, first_interval=1)
+    bpy.app.handlers.load_post.append(restartOperator)
 
 def unregister():
     bpy.utils.unregister_class(NDOFViewportSwitchOperator)
@@ -111,18 +123,4 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-
-
-
-@persistent
-def restartOperator(dummy):
-    # Unregister any existing timer to avoid duplication
-    try:
-        bpy.app.timers.unregister(startOperator)
-    except Exception:
-        pass
-    # Register timer/operator again
-    bpy.app.timers.register(startOperator, first_interval=1)
-
-bpy.app.handlers.load_post.append(restartOperator)
 

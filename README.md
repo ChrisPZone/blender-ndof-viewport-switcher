@@ -35,6 +35,8 @@ You can set the Translation and Rotation thresholds in the Add-On's preferences.
 
 ## Change Log
 
+- v1.3.2 @ 2026-09-05
+  - cleanup
 - v1.3.1 @ 2026-09-03
   - Add-On is now a Blender Extension
 - v1.3 @ 2026-04-13
