@@ -2,17 +2,6 @@
 # (C) 2025-2026 ChrisP
 
 
-bl_info = {
-    "name": "NDOF Viewport Switcher",
-    "author": "ChrisP",
-    "version": (1, 3, 2),
-    "blender": (4, 5, 0),
-    "location": "View3D",
-    "description": "Exit fixed views (ortho/camera) with NDOF device",
-    "category": "3D View",
-}
-
-
 import bpy
 from bpy.app.handlers import persistent
 from math import fabs
@@ -33,21 +22,21 @@ class NDOFViewportSwitcherPreferences(bpy.types.AddonPreferences):
 
     translation_threshold: bpy.props.FloatProperty(
         name="Translation Threshold",
-        description="NDOF movement sensitivity",
+        description="Minimum NDOF translation magnitude to trigger view switch",
         default=3,
         min=0.1,
         max=5.0,
         precision=1,
-        step=0.1
+        step=10
     )
     rotation_threshold: bpy.props.FloatProperty(
         name="Rotation Threshold",
-        description="NDOF movement sensitivity",
+        description="Minimum NDOF rotation magnitude to trigger view switch",
         default=1,
         min=0.1,
         max=5.0,
         precision=1,
-        step=0.1
+        step=10
     )
 
     def draw(self, context):
@@ -62,7 +51,7 @@ class NDOFViewportSwitchOperator(bpy.types.Operator):
     bl_label = "NDOF Viewport Switch"
 
     def modal(self, context, event):
-        prefs = context.preferences.addons[__name__].preferences
+        prefs = context.preferences.addons[__package__].preferences
         dt = prefs.translation_threshold
         dr = prefs.rotation_threshold
 
@@ -113,14 +102,12 @@ def startOperator():
 def register():
     bpy.utils.register_class(NDOFViewportSwitcherPreferences)
     bpy.utils.register_class(NDOFViewportSwitchOperator)
+    bpy.app.handlers.load_post.append(restartOperator)
     # Start operator via timer to ensure safe context
     bpy.app.timers.register(startOperator, first_interval=1)
-    bpy.app.handlers.load_post.append(restartOperator)
 
 def unregister():
+    bpy.app.handlers.load_post.remove(restartOperator)
     bpy.utils.unregister_class(NDOFViewportSwitchOperator)
     bpy.utils.unregister_class(NDOFViewportSwitcherPreferences)
-
-if __name__ == "__main__":
-    register()
 
