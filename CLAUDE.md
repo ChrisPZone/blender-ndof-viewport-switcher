@@ -32,4 +32,4 @@ There are no tests or linters; verification is manual in Blender with an NDOF de
 
 - Blender extension rules apply (the code was cleaned up after extensions-team review): no legacy `bl_info` dict, metadata only in `blender_manifest.toml`.
 - On release: bump `version` in `blender_manifest.toml` and add a dated entry to the Change Log in `README.md`.
-- `README.md`, `CLAUDE.md`, `.github/`, `.git/`, `__pycache__/`, and ZIPs are excluded from the build via `[build].paths_exclude_pattern`; new non-runtime files should be added there too.
+- `README.md`, `CLAUDE.md`, `.github/`, `.claude/`, `.git/`, `__pycache__/`, and ZIPs are excluded from the build via `[build].paths_exclude_pattern`; new non-runtime files should be added there too.
