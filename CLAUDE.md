@@ -22,12 +22,14 @@ There are no tests or linters; verification is manual in Blender with an NDOF de
 
 - `NDOFViewportSwitchOperator` (`view3d.ndof_viewport_switch`) is a **permanently running modal operator** that always returns `{'PASS_THROUGH'}`, so it observes `NDOF_MOTION` events without consuming them — Blender's normal NDOF navigation still happens.
 - On threshold breach it finds the `VIEW_3D` area **under the mouse pointer** (`view3d_area_under_mouse`), and if that view is `ORTHO` or `CAMERA` it sets `view_perspective = 'PERSP'`. Only when leaving `CAMERA` is `view_distance` reset to 10 (leaving ortho keeps the distance — intentional, see changelog v1.1).
-- Startup: modal operators can't be invoked directly from `register()` (no valid window context), so `register()` schedules `startOperator` via `bpy.app.timers` (1 s delay).
-- Modal handlers die when a new/different .blend file is loaded, so a `@persistent` `load_post` handler (`restartOperator`) re-schedules the timer. `unregister()` must remove that handler.
-- Thresholds come from `NDOFViewportSwitcherPreferences`, read on every event via `context.preferences.addons[__package__]` — `__package__` is required (not a hardcoded name) because extensions are namespaced (`bl_ext.<repo>.ndof_viewport_switcher`).
+- Startup: modal operators can't be invoked directly from `register()` (no valid window context), so `register()` schedules `start_operator` via `bpy.app.timers` (1 s delay). `start_operator` does nothing in `bpy.app.background`, and otherwise invokes the operator inside `temp_override(window=wm.windows[0])`.
+- Modal handlers die when a new/different .blend file is loaded, so a `@persistent` `load_post` handler (`restart_operator`) re-schedules the timer. It unregisters any pending timer first so the timer isn't registered twice.
+- **Single-instance guard:** `NDOFViewportSwitchOperator._active` is a class attribute that holds the one live instance. `invoke()` sets it, and `modal()` returns `{'CANCELLED'}` for any instance that isn't `_active`. Stale handlers from a disable/re-enable cycle remove themselves this way. `modal()` also cancels if `context.preferences.addons.get(__package__)` is `None`, meaning the add-on was disabled while the handler was still alive.
+- `unregister()` must undo everything `register()` did: unregister the pending timer, remove the `load_post` handler, clear `_active`, then unregister the classes.
+- Thresholds come from `NDOFViewportSwitcherPreferences` and are read on every event via `context.preferences.addons.get(__package__)`. Use `__package__`, not a hardcoded name, because extensions are namespaced (`bl_ext.<repo>.ndof_viewport_switcher`).
 
 ## Conventions
 
 - Blender extension rules apply (the code was cleaned up after extensions-team review): no legacy `bl_info` dict, metadata only in `blender_manifest.toml`.
 - On release: bump `version` in `blender_manifest.toml` and add a dated entry to the Change Log in `README.md`.
-- `README.md`, `.github/`, `.git/`, and ZIPs are excluded from the build via `[build].paths_exclude_pattern`; new non-runtime files should be added there too.
+- `README.md`, `CLAUDE.md`, `.github/`, `.git/`, `__pycache__/`, and ZIPs are excluded from the build via `[build].paths_exclude_pattern`; new non-runtime files should be added there too.
