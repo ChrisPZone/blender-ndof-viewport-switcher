@@ -35,6 +35,9 @@ You can set the Translation and Rotation thresholds in the Add-On's preferences.
 
 ## Change Log
 
+- v1.3.5 @ 2026-11-17
+  - Fix errors after disabling the add-on and duplicate instances after re-enabling it
+  - Skip startup in background mode; hide operator from search
 - v1.3.2 @ 2026-09-05
   - cleanup
 - v1.3.1 @ 2026-09-03

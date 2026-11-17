@@ -1,7 +1,7 @@
 schema_version = "1.0.0"
 
 id = "ndof_viewport_switcher"
-version = "1.3.4"
+version = "1.3.5"
 name = "NDOF Viewport Switcher"
 tagline = "Exit fixed views (ortho/camera) with NDOF device"
 maintainer = "ChrisP"
@@ -23,5 +23,6 @@ paths_exclude_pattern = [
   "/.git/",
   "/.github/",
   "/*.zip",
-  "/README.md"
+  "/README.md",
+  "/CLAUDE.md"
 ]

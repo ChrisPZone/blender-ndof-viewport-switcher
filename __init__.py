@@ -49,19 +49,25 @@ class NDOFViewportSwitcherPreferences(bpy.types.AddonPreferences):
 class NDOFViewportSwitchOperator(bpy.types.Operator):
     bl_idname = "view3d.ndof_viewport_switch"
     bl_label = "NDOF Viewport Switch"
+    bl_options = {'INTERNAL'}
+
+    # The one instance allowed to run; stale instances (e.g. after add-on re-enable) cancel themselves
+    _active = None
 
     def modal(self, context, event):
-        prefs = context.preferences.addons[__package__].preferences
-        dt = prefs.translation_threshold
-        dr = prefs.rotation_threshold
+        if self is not NDOFViewportSwitchOperator._active:
+            return {'CANCELLED'}
 
         if event.type == 'NDOF_MOTION':
-            tx, ty, tz = event.ndof_motion.translation
-            rx, ry, rz = event.ndof_motion.rotation
+            addon = context.preferences.addons.get(__package__)
+            if addon is None:
+                # Add-on was disabled while this modal handler was still running
+                return {'CANCELLED'}
+            prefs = addon.preferences
 
             # Check threshold
-            if fabs(tx) > dt or fabs(ty) > dt or fabs(tz) > dt or fabs(rx) > dr or fabs(ry) > dr or fabs(rz) > dr:
-                # area = next((a for a in context.screen.areas if a.type == 'VIEW_3D'), None)
+            if (max(map(fabs, event.ndof_motion.translation)) > prefs.translation_threshold
+                    or max(map(fabs, event.ndof_motion.rotation)) > prefs.rotation_threshold):
                 area = view3d_area_under_mouse(context, event)
                 if area:
                     region_3d = area.spaces.active.region_3d
@@ -72,42 +78,46 @@ class NDOFViewportSwitchOperator(bpy.types.Operator):
                         region_3d.view_perspective = 'PERSP'
                         if perspective == 'CAMERA':
                             region_3d.view_distance = 10
-                        # return {'FINISHED'}
 
         return {'PASS_THROUGH'}
 
     def invoke(self, context, event):
+        NDOFViewportSwitchOperator._active = self
         context.window_manager.modal_handler_add(self)
         self.report({'INFO'}, "NDOF Viewport Switcher is ON")
         return {'RUNNING_MODAL'}
 
 
 @persistent
-def restartOperator(dummy):
-    # Unregister any existing timer to avoid duplication
-    try:
-        bpy.app.timers.unregister(startOperator)
-    except Exception:
-        pass
-    # Register timer/operator again
-    bpy.app.timers.register(startOperator, first_interval=1)
+def restart_operator(dummy):
+    # Unregister any pending timer to avoid duplication, then schedule again
+    if bpy.app.timers.is_registered(start_operator):
+        bpy.app.timers.unregister(start_operator)
+    bpy.app.timers.register(start_operator, first_interval=1)
 
 
-def startOperator():
-    if bpy.context.window_manager:
-        bpy.ops.view3d.ndof_viewport_switch('INVOKE_DEFAULT')
+def start_operator():
+    if bpy.app.background:
+        return None
+    wm = bpy.context.window_manager
+    if wm and wm.windows:
+        with bpy.context.temp_override(window=wm.windows[0]):
+            bpy.ops.view3d.ndof_viewport_switch('INVOKE_DEFAULT')
     return None
 
 
 def register():
     bpy.utils.register_class(NDOFViewportSwitcherPreferences)
     bpy.utils.register_class(NDOFViewportSwitchOperator)
-    bpy.app.handlers.load_post.append(restartOperator)
+    bpy.app.handlers.load_post.append(restart_operator)
     # Start operator via timer to ensure safe context
-    bpy.app.timers.register(startOperator, first_interval=1)
+    bpy.app.timers.register(start_operator, first_interval=1)
+
 
 def unregister():
-    bpy.app.handlers.load_post.remove(restartOperator)
+    if bpy.app.timers.is_registered(start_operator):
+        bpy.app.timers.unregister(start_operator)
+    bpy.app.handlers.load_post.remove(restart_operator)
+    NDOFViewportSwitchOperator._active = None
     bpy.utils.unregister_class(NDOFViewportSwitchOperator)
     bpy.utils.unregister_class(NDOFViewportSwitcherPreferences)
-
